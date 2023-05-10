@@ -15,7 +15,57 @@ function autoBind(
     return adjDescriptor;
 }
 
+//Validation Interface
+interface Validetable {
+  value: string | number;
+  required?: boolean;
+  minLength?: number;
+  maxLength?: number;
+  min?: number;
+  max?: number;
+}
 
+function validate(validatableInput: Validetable) {
+  let isValid = true;
+
+  if(validatableInput.required){
+    isValid = isValid && validatableInput.value.toString().trim().length !== 0;
+  }
+
+  if(
+    validatableInput.minLength != null && 
+    typeof validatableInput.value === 'string'
+    ) {
+    isValid = 
+      isValid && validatableInput.value.length >= validatableInput.minLength;
+  }
+
+  if(
+    validatableInput.maxLength != null && 
+    typeof validatableInput.value === 'string'
+    ) {
+    isValid = 
+      isValid && validatableInput.value.length <= validatableInput.maxLength;
+  }
+
+  if(
+    validatableInput.min != null && 
+    typeof validatableInput.value === 'number'
+    ) {
+    isValid = 
+      isValid && validatableInput.value >= validatableInput.min;
+  }
+
+  if(
+    validatableInput.max != null && 
+    typeof validatableInput.value === 'number'
+    ) {
+    isValid = 
+      isValid && validatableInput.value <= validatableInput.max;
+  }
+
+  return isValid;
+}
 
 //ProjectInput Class
 class ProjectInput {
@@ -47,10 +97,54 @@ class ProjectInput {
     this.attach();
   }
 
+  private gaterUserInput(): [string, string, number] | void {
+    const enteredTitle = this.titleInputElement.value;
+    const enteredDescription = this.descriptionInputElement.value;
+    const enteredPeople = this.peopleInputElement.value;
+
+    const titleValidateTable: Validetable = {
+      value: enteredTitle,
+      required: true
+    }
+    const descriptionValidateTable: Validetable = {
+      value: enteredDescription,
+      required: true,
+      minLength: 5
+    }
+    const peopleValidateTable: Validetable = {
+      value: enteredPeople,
+      required: true,
+      min: 1,
+      max: 5,
+    }
+
+    if(
+      !validate(titleValidateTable) ||
+      !validate(descriptionValidateTable) ||
+      !validate(peopleValidateTable)
+    ){
+      alert('Invalid input, please try again');
+      return;
+    } else {
+      return [enteredTitle, enteredDescription, +enteredPeople]
+    }
+   
+  }
+
+  private clearInput(): void {
+    this.titleInputElement.value = '';
+    this.descriptionInputElement.value = '';
+    this.peopleInputElement.value = '';
+  }
+
   @autoBind
   private submitHandler(e: Event) {
     e.preventDefault();
-    console.log(this.titleInputElement.value)
+    const userInput = this.gaterUserInput();
+    if(Array.isArray(userInput)) {
+      //const [title, desc, people] = userInput;
+      this.clearInput()
+    }
   }
 
   private configure() {
