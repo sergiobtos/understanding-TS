@@ -143,7 +143,8 @@ class ProjectItem extends Component<HTMLUListElement, HTMLLIElement> implements 
   }
   @autoBind
   dragStartHandler(event: DragEvent): void {
-    throw new Error("Method not implemented.");
+    event.dataTransfer!.setData('text/plain', this.project.id);
+    event.dataTransfer!.effectAllowed = 'move';
   }
   @autoBind
   dragEndHandler(event: DragEvent): void {
@@ -162,7 +163,7 @@ class ProjectItem extends Component<HTMLUListElement, HTMLLIElement> implements 
 }
 
 //Project List Class
-class ProjectList extends Component<HTMLDivElement, HTMLElement> {
+class ProjectList extends Component<HTMLDivElement, HTMLElement> implements DragTarget {
   assignedProjects: Project[];
 
   constructor(private type: "active" | "finished") {
@@ -171,6 +172,24 @@ class ProjectList extends Component<HTMLDivElement, HTMLElement> {
 
     this.configure();
     this.renderContent();
+  }
+  @autoBind
+  dragOverHandler(event: DragEvent): void {
+    if(event.dataTransfer && event.dataTransfer.types[0] === 'text/plain') {
+      event.preventDefault();
+      const listEl = this.element.querySelector('ul')!;
+      listEl.classList.add('droppable');
+    }
+  }
+  @autoBind
+  dropHandler(event: DragEvent): void {
+    const prjId = event.dataTransfer!.getData('text/plain');
+    projectState.moveProject(prjId, this.type === "active" ? ProjectStatus.Active : ProjectStatus.Finished);
+  }
+  @autoBind
+  dragLeaveHandler(_: DragEvent): void {
+    const listEl = this.element.querySelector('ul')!;
+    listEl.classList.remove('droppable');
   }
 
   private renderProjects() {
@@ -194,6 +213,9 @@ class ProjectList extends Component<HTMLDivElement, HTMLElement> {
   }
 
   configure() {
+    this.element.addEventListener("dragover", this.dragOverHandler);
+    this.element.addEventListener("dragleave", this.dragLeaveHandler);
+    this.element.addEventListener("drag", this.dropHandler);
     projectState.addListener((projects: Project[]) => {
       const relevantProjects = projects.filter((project) => {
         if(this.type === "active") {
@@ -245,6 +267,18 @@ class ProjectState extends State<Project> {
     );
 
     this.projects.push(newProject);
+    this.updateListeners();
+  }
+
+  moveProject(projectId: string, newStatus: ProjectStatus): void {
+    const project = this.projects.find(prj => prj.id === projectId);
+    if(project && project.status !== newStatus) {
+      project.status = newStatus;
+      this.updateListeners();
+    }
+  }
+
+  private updateListeners() {
     for (const listenerFn of this.listeners) {
       listenerFn(this.projects.slice());
     }
