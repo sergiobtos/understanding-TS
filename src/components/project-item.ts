@@ -1,7 +1,9 @@
-/// <reference path="base-component.ts"/>
+import { Draggable} from '../models/drag-drop.js';
+import { Component } from './base-component.js';
+import { Project } from '../models/project.js';
+import { autoBind } from '../decorators/autobind.js';
 
-namespace App {
-     //ProjectItem Class
+  //ProjectItem Class
   export class ProjectItem
   extends Component<HTMLUListElement, HTMLLIElement>
   implements Draggable
@@ -29,7 +31,7 @@ namespace App {
     event.dataTransfer!.effectAllowed = "move";
   }
   @autoBind
-  dragEndHandler(event: DragEvent): void {
+  dragEndHandler(_: DragEvent): void {
     throw new Error("Method not implemented.");
   }
 
@@ -43,6 +45,4 @@ namespace App {
       this.persons + " assigned";
     this.element.querySelector("p")!.textContent = this.project.description;
   }
-}
-
 }

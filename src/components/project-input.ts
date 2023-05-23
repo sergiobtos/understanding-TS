@@ -1,7 +1,9 @@
-/// <reference path="base-component.ts"/>
-
-namespace App {
-   //ProjectInput Class
+import { Component } from './base-component.js';
+import { Validatable, validate} from '../util/validation.js';
+import { autoBind } from '../decorators/autobind.js';
+import { projectState } from '../state/project-state.js';
+   
+//ProjectInput Class
   export class ProjectInput extends Component<HTMLDivElement, HTMLFormElement> {
     titleInputElement: HTMLInputElement;
     descriptionInputElement: HTMLInputElement;
@@ -26,16 +28,16 @@ namespace App {
       const enteredDescription = this.descriptionInputElement.value;
       const enteredPeople = this.peopleInputElement.value;
 
-      const titleValidateTable: Validetable = {
+      const titleValidateTable: Validatable = {
         value: enteredTitle,
         required: true,
       };
-      const descriptionValidateTable: Validetable = {
+      const descriptionValidateTable: Validatable = {
         value: enteredDescription,
         required: true,
         minLength: 5,
       };
-      const peopleValidateTable: Validetable = {
+      const peopleValidateTable: Validatable = {
         value: enteredPeople,
         required: true,
         min: 1,
@@ -77,5 +79,3 @@ namespace App {
 
     renderContent(): void {}
   }
- 
-}

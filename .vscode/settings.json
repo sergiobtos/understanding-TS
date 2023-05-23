@@ -1,3 +1,7 @@
 {
-    "editor.linkedEditing": true
+    "editor.linkedEditing": true,
+    "cSpell.words": [
+        "autobind",
+        "Validatable"
+    ]
 }
